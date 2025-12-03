@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import MobileHeader from '@/components/layout/MobileHeader'
 import BottomNav from '@/components/layout/BottomNav'
 import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getApiClient } from '@/lib/api'
 
 const ORDER_DURATIONS = [
@@ -14,9 +14,12 @@ const ORDER_DURATIONS = [
   { label: '5 phút', value: 300, profit: 20 },
 ]
 
-export default function TradingBoardPage() {
+function TradingBoardContent() {
   const { isAuthenticated } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const marketId = searchParams.get('marketId') || 'btc-usdt'
+  
   const [amount, setAmount] = useState(100)
   const [duration, setDuration] = useState(60)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,7 +47,7 @@ export default function TradingBoardPage() {
     try {
       const apiClient = getApiClient()
       await apiClient.order.create({
-        marketId: 'btc-usdt', // Default market, should come from route params
+        marketId,
         type,
         amount,
         duration,
@@ -160,5 +163,20 @@ export default function TradingBoardPage() {
 
       <BottomNav />
     </div>
+  )
+}
+
+export default function TradingBoardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background-primary text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary-main border-r-transparent"></div>
+          <p className="mt-2 text-sm text-white/60">Đang tải...</p>
+        </div>
+      </div>
+    }>
+      <TradingBoardContent />
+    </Suspense>
   )
 }

@@ -30,14 +30,24 @@ export default function MarketPage() {
         const apiClient = getApiClient()
         const marketList = await apiClient.market.list(category)
         
-        // For now, use mock prices since we don't have real price data
-        // In production, fetch prices for each market
-        const marketsWithPrices: MarketWithPrice[] = marketList.map((market) => ({
-          ...market,
-          price: Math.random() * 1000 + 100,
-          change24h: (Math.random() - 0.5) * 10,
-          volume: Math.random() * 10000000,
-        }))
+        // Mock static prices for consistent display
+        // TODO: Replace with real price API when available
+        const mockPrices: Record<string, { price: number; change24h: number; volume: number }> = {
+          'btc-usdt': { price: 42500.50, change24h: 3.02, volume: 15420000 },
+          'eth-usdt': { price: 2250.75, change24h: -2.18, volume: 8500000 },
+          'xau-usd': { price: 2035.20, change24h: 1.25, volume: 5420000 },
+          'oil-usd': { price: 78.45, change24h: -0.85, volume: 3200000 },
+          'eur-usd': { price: 1.0842, change24h: 0.15, volume: 12500000 },
+          'gbp-usd': { price: 1.2635, change24h: -0.32, volume: 8900000 },
+        }
+        
+        const marketsWithPrices: MarketWithPrice[] = marketList.map((market) => {
+          const priceData = mockPrices[market.id] || { price: 100, change24h: 0, volume: 1000000 }
+          return {
+            ...market,
+            ...priceData,
+          }
+        })
         
         setMarkets(marketsWithPrices)
       } catch (error) {
@@ -116,7 +126,7 @@ export default function MarketPage() {
                 markets.map((market) => (
                   <Link
                     key={market.id}
-                    href={`/board/${market.symbol}`}
+                    href={`/board?marketId=${market.id}`}
                     className="block bg-background-secondary rounded-lg p-4 hover:bg-background-tertiary transition"
                   >
                     <div className="flex items-center justify-between mb-2">

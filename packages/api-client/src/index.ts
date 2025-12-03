@@ -5,9 +5,11 @@ import { OrderService } from './services/order.service'
 import { WalletService } from './services/wallet.service'
 import { LeaderboardService } from './services/leaderboard.service'
 import { ContentService } from './services/content.service'
+import { AdminService } from './services/admin.service'
 
 export * from './types'
 export * from './client'
+export * from './services/admin.service'
 
 export class CMEApiClient {
   public auth: AuthService
@@ -16,6 +18,7 @@ export class CMEApiClient {
   public wallet: WalletService
   public leaderboard: LeaderboardService
   public content: ContentService
+  public admin: AdminService
 
   private client: ApiClient
 
@@ -28,6 +31,7 @@ export class CMEApiClient {
     this.wallet = new WalletService(this.client)
     this.leaderboard = new LeaderboardService(this.client)
     this.content = new ContentService(this.client)
+    this.admin = new AdminService(this.client)
   }
 
   setToken(token: string) {
