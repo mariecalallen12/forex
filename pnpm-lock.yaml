@@ -32,6 +32,9 @@ importers:
 
   apps/admin-web:
     dependencies:
+      '@cme-trading/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@cme-trading/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -96,6 +99,9 @@ importers:
 
   apps/customer-web:
     dependencies:
+      '@cme-trading/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@cme-trading/shared':
         specifier: workspace:*
         version: link:../../packages/shared
