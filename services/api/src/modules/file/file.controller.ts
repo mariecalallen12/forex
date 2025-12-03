@@ -12,7 +12,7 @@ export class FileController {
   @ApiOperation({ summary: 'Upload file' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+  async uploadFile(@UploadedFile() file: any) {
     return this.fileService.uploadFile(file);
   }
 }
