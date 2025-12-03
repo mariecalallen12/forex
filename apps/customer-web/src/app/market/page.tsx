@@ -1,17 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import MobileHeader from '@/components/layout/MobileHeader'
 import BottomNav from '@/components/layout/BottomNav'
 import Link from 'next/link'
 import { getApiClient } from '@/lib/api'
-import type { Market, MarketPrice } from '@cme-trading/api-client'
+import { usePriceSocket } from '@/hooks/usePriceSocket'
+import type { Market } from '@cme-trading/api-client'
 
 type Category = 'GOODS' | 'CRYPTOCURRENCY' | 'MONEY'
 
 interface MarketWithPrice extends Market {
   price?: number
   change24h?: number
+  changePercent24h?: number
   volume?: number
 }
 
@@ -20,6 +22,15 @@ export default function MarketPage() {
   const [markets, setMarkets] = useState<MarketWithPrice[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isError, setIsError] = useState(false)
+
+  // Get market IDs for WebSocket subscription
+  const marketIds = useMemo(() => markets.map(m => m.id), [markets])
+  
+  // Connect to WebSocket for real-time prices
+  const { prices, isConnected } = usePriceSocket({
+    markets: marketIds,
+    enabled: marketIds.length > 0,
+  })
 
   useEffect(() => {
     const fetchMarkets = async () => {
@@ -30,19 +41,18 @@ export default function MarketPage() {
         const apiClient = getApiClient()
         const marketList = await apiClient.market.list(category)
         
-        // Mock static prices for consistent display
-        // TODO: Replace with real price API when available
-        const mockPrices: Record<string, { price: number; change24h: number; volume: number }> = {
-          'btc-usdt': { price: 42500.50, change24h: 3.02, volume: 15420000 },
-          'eth-usdt': { price: 2250.75, change24h: -2.18, volume: 8500000 },
-          'xau-usd': { price: 2035.20, change24h: 1.25, volume: 5420000 },
-          'oil-usd': { price: 78.45, change24h: -0.85, volume: 3200000 },
-          'eur-usd': { price: 1.0842, change24h: 0.15, volume: 12500000 },
-          'gbp-usd': { price: 1.2635, change24h: -0.32, volume: 8900000 },
+        // Initialize with static prices (will be updated by WebSocket)
+        const mockPrices: Record<string, { price: number; change24h: number; changePercent24h: number; volume: number }> = {
+          'btc-usdt': { price: 42500.50, change24h: 1280.15, changePercent24h: 3.02, volume: 15420000 },
+          'eth-usdt': { price: 2250.75, change24h: -50.12, changePercent24h: -2.18, volume: 8500000 },
+          'xau-usd': { price: 2035.20, change24h: 25.14, changePercent24h: 1.25, volume: 5420000 },
+          'oil-usd': { price: 78.45, change24h: -0.67, changePercent24h: -0.85, volume: 3200000 },
+          'eur-usd': { price: 1.0842, change24h: 0.0016, changePercent24h: 0.15, volume: 12500000 },
+          'gbp-usd': { price: 1.2635, change24h: -0.0041, changePercent24h: -0.32, volume: 8900000 },
         }
         
         const marketsWithPrices: MarketWithPrice[] = marketList.map((market) => {
-          const priceData = mockPrices[market.id] || { price: 100, change24h: 0, volume: 1000000 }
+          const priceData = mockPrices[market.id] || { price: 100, change24h: 0, changePercent24h: 0, volume: 1000000 }
           return {
             ...market,
             ...priceData,
@@ -60,6 +70,27 @@ export default function MarketPage() {
 
     fetchMarkets()
   }, [category])
+
+  // Update markets with real-time prices
+  useEffect(() => {
+    if (prices.size === 0) return
+
+    setMarkets(prevMarkets => 
+      prevMarkets.map(market => {
+        const livePrice = prices.get(market.id)
+        if (livePrice) {
+          return {
+            ...market,
+            price: livePrice.price,
+            change24h: livePrice.change24h,
+            changePercent24h: livePrice.changePercent24h,
+            volume: livePrice.volume24h,
+          }
+        }
+        return market
+      })
+    )
+  }, [prices])
 
   return (
     <div className="min-h-screen bg-background-primary text-white pb-20">
@@ -82,6 +113,18 @@ export default function MarketPage() {
             </button>
           ))}
         </div>
+
+        {/* WebSocket Status Indicator */}
+        {!isLoading && !isError && (
+          <div className="px-4 pt-2">
+            <div className="flex items-center gap-2 text-xs">
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success-main animate-pulse' : 'bg-white/30'}`}></div>
+              <span className={isConnected ? 'text-success-main' : 'text-white/50'}>
+                {isConnected ? 'Live prices' : 'Connecting...'}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Market List */}
         <div className="px-4 py-4">
@@ -140,13 +183,13 @@ export default function MarketPage() {
                         </div>
                         <div
                           className={`text-sm font-medium ${
-                            (market.change24h || 0) > 0
+                            (market.changePercent24h || 0) > 0
                               ? 'text-success-main'
                               : 'text-danger-main'
                           }`}
                         >
-                          {(market.change24h || 0) > 0 ? '+' : ''}
-                          {market.change24h || 0}%
+                          {(market.changePercent24h || 0) > 0 ? '+' : ''}
+                          {(market.changePercent24h || 0).toFixed(2)}%
                         </div>
                       </div>
                     </div>
