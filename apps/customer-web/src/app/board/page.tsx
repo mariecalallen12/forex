@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import MobileHeader from '@/components/layout/MobileHeader'
 import BottomNav from '@/components/layout/BottomNav'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getApiClient } from '@/lib/api'
+import { usePriceSocket } from '@/hooks/usePriceSocket'
 
 const ORDER_DURATIONS = [
   { label: '1 phút', value: 60, profit: 5 },
@@ -24,6 +25,29 @@ function TradingBoardContent() {
   const [duration, setDuration] = useState(60)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [marketSymbol, setMarketSymbol] = useState('BTC/USDT')
+
+  // Connect to live prices
+  const { prices, isConnected } = usePriceSocket({
+    markets: [marketId],
+    enabled: true,
+  })
+
+  const currentPrice = prices.get(marketId)
+
+  // Fetch market details
+  useEffect(() => {
+    const fetchMarketDetails = async () => {
+      try {
+        const apiClient = getApiClient()
+        const market = await apiClient.market.detail(marketId)
+        setMarketSymbol(market.symbol)
+      } catch (error) {
+        console.error('Failed to fetch market details:', error)
+      }
+    }
+    fetchMarketDetails()
+  }, [marketId])
 
   const selectedDuration = ORDER_DURATIONS.find(d => d.value === duration)
   const expectedProfit = amount * (selectedDuration?.profit || 0) / 100
@@ -75,17 +99,50 @@ function TradingBoardContent() {
       <MobileHeader title="Trading Board" />
 
       <main className="pt-16 max-w-md mx-auto">
-        {/* Chart Placeholder */}
+        {/* Live Price Display */}
         <div className="bg-background-secondary p-4 mx-4 mt-4 rounded-lg">
-          <div className="h-64 flex items-center justify-center border border-white/10 rounded">
-            <div className="text-center">
-              <div className="text-4xl mb-2">📈</div>
-              <div className="text-white/60">Chart Area</div>
-              <div className="text-sm text-white/40 mt-2">
-                TradingView hoặc Chart Component
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold">{marketSymbol}</h2>
+              <div className="flex items-center gap-2 text-xs">
+                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success-main animate-pulse' : 'bg-white/30'}`}></div>
+                <span className={isConnected ? 'text-success-main' : 'text-white/50'}>
+                  {isConnected ? 'Live' : 'Connecting...'}
+                </span>
               </div>
             </div>
+            {currentPrice && (
+              <div className="text-right">
+                <div className="text-3xl font-bold">
+                  ${currentPrice.price.toLocaleString()}
+                </div>
+                <div className={`text-sm font-medium ${
+                  currentPrice.changePercent24h > 0 ? 'text-success-main' : 'text-danger-main'
+                }`}>
+                  {currentPrice.changePercent24h > 0 ? '+' : ''}
+                  {currentPrice.changePercent24h.toFixed(2)}%
+                </div>
+              </div>
+            )}
           </div>
+          
+          {/* 24h Stats */}
+          {currentPrice && (
+            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-white/10">
+              <div>
+                <div className="text-xs text-white/50">24h High</div>
+                <div className="text-sm font-semibold">${currentPrice.high24h.toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/50">24h Low</div>
+                <div className="text-sm font-semibold">${currentPrice.low24h.toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/50">Volume</div>
+                <div className="text-sm font-semibold">${(currentPrice.volume24h / 1000000).toFixed(2)}M</div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Order Form */}
