@@ -1,22 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-
-const mockOrders = [
-  { id: 'ORD-001', user: 'user1@example.com', pair: 'BTC/USD', type: 'BUY_UP', amount: '$1,234.56', profit: '$234.56', status: 'completed', created: '2024-03-01 10:30' },
-  { id: 'ORD-002', user: 'user2@example.com', pair: 'ETH/USD', type: 'BUY_DOWN', amount: '$567.89', profit: '-$67.89', status: 'completed', created: '2024-03-01 11:15' },
-  { id: 'ORD-003', user: 'user3@example.com', pair: 'XAU/USD', type: 'BUY_UP', amount: '$890.12', profit: '$0.00', status: 'pending', created: '2024-03-01 12:00' },
-  { id: 'ORD-004', user: 'user4@example.com', pair: 'EUR/USD', type: 'BUY_DOWN', amount: '$432.10', profit: '$43.21', status: 'completed', created: '2024-03-01 13:45' },
-  { id: 'ORD-005', user: 'user5@example.com', pair: 'GBP/USD', type: 'BUY_UP', amount: '$765.43', profit: '$0.00', status: 'cancelled', created: '2024-03-01 14:20' },
-]
+import { useAdminOrders } from '@/hooks/useAdminOrders'
 
 export default function OrderTable() {
   const [searchTerm, setSearchTerm] = useState('')
+  const { orders, isLoading } = useAdminOrders()
 
-  const filteredOrders = mockOrders.filter(order => 
+  const filteredOrders = orders.filter(order => 
     order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.pair.toLowerCase().includes(searchTerm.toLowerCase())
+    order.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.marketId.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
@@ -31,8 +25,18 @@ export default function OrderTable() {
         />
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        {isLoading ? (
+          <div className="p-8 text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+            <p className="mt-2 text-sm text-gray-600">Đang tải dữ liệu...</p>
+          </div>
+        ) : filteredOrders.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            {searchTerm ? 'Không tìm thấy kết quả' : 'Chưa có đơn hàng nào'}
+          </div>
+        ) : (
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 ID
@@ -63,56 +67,57 @@ export default function OrderTable() {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {filteredOrders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                  {order.id}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                  {order.user}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                  {order.pair}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm">
-                  <span className={`inline-flex rounded px-2 py-1 text-xs font-semibold ${
-                    order.type === 'BUY_UP' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {filteredOrders.map((order) => (
+                <tr key={order.id} className="hover:bg-gray-50">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                    {order.id}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {order.userId}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {order.marketId}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm">
+                    <span className={`inline-flex rounded px-2 py-1 text-xs font-semibold ${
+                      order.type === 'BUY_UP' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {order.type}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                    ${order.amount.toFixed(2)}
+                  </td>
+                  <td className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${
+                    order.profit && order.profit < 0 ? 'text-red-600' : 'text-green-600'
                   }`}>
-                    {order.type}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                  {order.amount}
-                </td>
-                <td className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${
-                  order.profit.startsWith('-') ? 'text-red-600' : 'text-green-600'
-                }`}>
-                  {order.profit}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm">
-                  <span
-                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                      order.status === 'completed'
-                        ? 'bg-green-100 text-green-800'
-                        : order.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
-                  >
-                    {order.status}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {order.created}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm">
-                  <button className="text-blue-600 hover:text-blue-900">Xem</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    {order.profit ? `$${order.profit.toFixed(2)}` : '$0.00'}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm">
+                    <span
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                        order.status === 'COMPLETED'
+                          ? 'bg-green-100 text-green-800'
+                          : order.status === 'PENDING'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {new Date(order.createdAt).toLocaleString('vi-VN')}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm">
+                    <button className="text-blue-600 hover:text-blue-900">Xem</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )

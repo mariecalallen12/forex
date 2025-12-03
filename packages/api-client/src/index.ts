@@ -41,6 +41,27 @@ export class CMEApiClient {
   clearToken() {
     this.client.clearToken()
   }
+
+  // Expose raw HTTP methods for custom API calls
+  async get<T>(url: string, config?: any): Promise<T> {
+    return this.client.get<T>(url, config)
+  }
+
+  async post<T>(url: string, data?: any, config?: any): Promise<T> {
+    return this.client.post<T>(url, data, config)
+  }
+
+  async put<T>(url: string, data?: any, config?: any): Promise<T> {
+    return this.client.put<T>(url, data, config)
+  }
+
+  async patch<T>(url: string, data?: any, config?: any): Promise<T> {
+    return this.client.patch<T>(url, data, config)
+  }
+
+  async delete<T>(url: string, config?: any): Promise<T> {
+    return this.client.delete<T>(url, config)
+  }
 }
 
 // Singleton instance
