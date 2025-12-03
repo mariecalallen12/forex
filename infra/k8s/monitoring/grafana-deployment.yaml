@@ -105,7 +105,9 @@ metadata:
   namespace: cme-trading
 type: Opaque
 stringData:
-  admin-password: "changeme_in_production"
+  # ⚠️ CRITICAL: Change this password before production deployment!
+  # Generate strong password: openssl rand -base64 16
+  admin-password: "REPLACE_WITH_STRONG_GRAFANA_PASSWORD"
 ---
 apiVersion: v1
 kind: ConfigMap

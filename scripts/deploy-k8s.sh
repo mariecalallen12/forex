@@ -42,15 +42,45 @@ echo "📦 Step 1: Creating namespace..."
 kubectl apply -f "$K8S_DIR/base/namespace.yaml"
 
 echo ""
-echo "🔐 Step 2: Creating secrets..."
-echo "⚠️  Make sure to update secrets before deploying to production!"
+echo "🔐 Step 2: Validating secrets..."
 if [ "$ENVIRONMENT" = "prod" ]; then
-    read -p "Have you updated production secrets? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "⚠️  Please update infra/k8s/overlays/prod/secrets.env first!"
+    SECRETS_FILE="$K8S_DIR/overlays/prod/secrets.env"
+    
+    # Check if secrets file exists
+    if [ ! -f "$SECRETS_FILE" ]; then
+        echo "❌ Production secrets file not found: $SECRETS_FILE"
         exit 1
     fi
+    
+    # Validate that placeholder values have been replaced
+    if grep -q "REPLACE_WITH" "$SECRETS_FILE" || grep -q "CHANGE_ME" "$SECRETS_FILE"; then
+        echo "❌ Production secrets still contain placeholder values!"
+        echo "Please update $SECRETS_FILE with actual values."
+        echo ""
+        echo "Generate strong secrets using:"
+        echo "  openssl rand -base64 32"
+        exit 1
+    fi
+    
+    # Validate kustomization registry URLs
+    KUST_FILE="$K8S_DIR/overlays/prod/kustomization.yaml"
+    if grep -q "REPLACE_WITH_YOUR_REGISTRY" "$KUST_FILE"; then
+        echo "❌ Docker registry URLs not configured!"
+        echo "Please update $KUST_FILE with your actual registry URLs."
+        exit 1
+    fi
+    
+    # Validate Grafana password
+    GRAFANA_FILE="$K8S_DIR/monitoring/grafana-deployment.yaml"
+    if grep -q "REPLACE_WITH_STRONG_GRAFANA_PASSWORD" "$GRAFANA_FILE"; then
+        echo "❌ Grafana password not configured!"
+        echo "Please update $GRAFANA_FILE with a strong password."
+        exit 1
+    fi
+    
+    echo "✅ Secrets validation passed!"
+else
+    echo "⚠️  Using development configuration with default secrets"
 fi
 
 echo ""
@@ -92,8 +122,9 @@ echo ""
 echo "3. Access services locally:"
 echo "   kubectl port-forward -n cme-trading svc/api-service 3001:3001"
 echo "   kubectl port-forward -n cme-trading svc/customer-web-service 3000:3000"
+echo "   kubectl port-forward -n cme-trading svc/admin-web-service 3002:3002"
 echo "   kubectl port-forward -n cme-trading svc/prometheus-service 9090:9090"
-echo "   kubectl port-forward -n cme-trading svc/grafana-service 3000:3000"
+echo "   kubectl port-forward -n cme-trading svc/grafana-service 3333:3000"
 echo ""
 echo "4. Get LoadBalancer IP:"
 echo "   kubectl get svc nginx-lb-service -n cme-trading"

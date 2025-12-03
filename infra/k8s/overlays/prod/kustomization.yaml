@@ -23,15 +23,20 @@ secretGenerator:
       - secrets.env
 
 images:
+  # ⚠️ Replace with your actual Docker registry URLs
+  # Examples:
+  # - Docker Hub: username/cme-api
+  # - GCR: gcr.io/project-id/cme-api
+  # - ECR: 123456789012.dkr.ecr.us-east-1.amazonaws.com/cme-api
   - name: cme-api
-    newName: your-docker-registry/cme-api
+    newName: REPLACE_WITH_YOUR_REGISTRY/cme-api
     newTag: latest
   - name: cme-realtime
-    newName: your-docker-registry/cme-realtime
+    newName: REPLACE_WITH_YOUR_REGISTRY/cme-realtime
     newTag: latest
   - name: cme-customer-web
-    newName: your-docker-registry/cme-customer-web
+    newName: REPLACE_WITH_YOUR_REGISTRY/cme-customer-web
     newTag: latest
   - name: cme-admin-web
-    newName: your-docker-registry/cme-admin-web
+    newName: REPLACE_WITH_YOUR_REGISTRY/cme-admin-web
     newTag: latest
