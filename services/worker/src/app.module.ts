@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { OrderMatchingModule } from './jobs/order-matching.module';
 import { NotificationModule } from './jobs/notification.module';
 import { ScheduledTasksModule } from './jobs/scheduled-tasks.module';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -22,5 +23,6 @@ import { ScheduledTasksModule } from './jobs/scheduled-tasks.module';
     NotificationModule,
     ScheduledTasksModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

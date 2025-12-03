@@ -2,6 +2,10 @@ import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
 import { OrderMatchingJob } from './order-matching.service';
 
+// Configuration constants
+const PAYOUT_RATE = 0.85; // 85% payout on win
+const PRICE_VOLATILITY = 0.02; // +/- 2% price movement
+
 @Processor('order-matching')
 export class OrderMatchingProcessor {
   @Process('match-order')
@@ -12,19 +16,20 @@ export class OrderMatchingProcessor {
 
     // Simulate price movement and settlement
     // In production, this would:
-    // 1. Get current market price
+    // 1. Get current market price from external service
     // 2. Calculate profit/loss
-    // 3. Update user wallet
+    // 3. Update user wallet in database
     // 4. Update order status
-    // 5. Send notification
+    // 5. Send notification to user
 
     try {
-      // Mock settlement logic
-      const exitPrice = entryPrice * (1 + (Math.random() - 0.5) * 0.02); // Random +/- 1%
+      // Mock settlement logic - TODO: Replace with real price feed service
+      const priceChange = (Math.random() - 0.5) * PRICE_VOLATILITY;
+      const exitPrice = entryPrice * (1 + priceChange);
       const isWin = (direction === 'UP' && exitPrice > entryPrice) || 
                     (direction === 'DOWN' && exitPrice < entryPrice);
       
-      const pnl = isWin ? amount * 0.85 : -amount; // 85% payout on win
+      const pnl = isWin ? amount * PAYOUT_RATE : -amount;
 
       console.log(`Order ${orderId} settled:`, {
         entryPrice,

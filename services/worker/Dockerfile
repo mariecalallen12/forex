@@ -2,13 +2,13 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install pnpm globally (only once)
+RUN npm install -g pnpm@8
+
 # Copy package files
 COPY package*.json ./
 COPY pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
-
-# Install pnpm
-RUN npm install -g pnpm@8
 
 # Copy workspace packages
 COPY packages/ ./packages/
@@ -26,8 +26,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm@8
+# Copy pnpm from builder instead of reinstalling
+COPY --from=builder /usr/local/bin/pnpm /usr/local/bin/pnpm
+COPY --from=builder /usr/local/lib/node_modules/pnpm /usr/local/lib/node_modules/pnpm
 
 # Copy package files
 COPY package*.json ./

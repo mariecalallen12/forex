@@ -17,8 +17,12 @@ export class NotificationProcessor {
     // 4. Send via WebSocket if user is online
 
     try {
-      // Mock notification sending
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Mock notification sending - TODO: Implement real notification service
+      // In production, remove this delay or make it configurable
+      const delay = parseInt(process.env.NOTIFICATION_DELAY || '0');
+      if (delay > 0) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
 
       console.log(`Notification sent successfully to user ${userId}`);
 
