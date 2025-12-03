@@ -1,14 +1,14 @@
 # Báo cáo tiến độ triển khai - Hệ thống CME Trading Clone
 
 **Ngày báo cáo**: 2025-12-03  
-**Phiên bản**: 2.0  
-**Trạng thái**: Đang triển khai - Phase 5/10
+**Phiên bản**: 3.0  
+**Trạng thái**: Đang triển khai - Phase 6/11
 
 ---
 
 ## 📊 Tổng quan tiến độ
 
-### Hoàn thành: ~70%
+### Hoàn thành: ~78%
 
 | Phase | Tên | Trạng thái | Hoàn thành |
 |-------|-----|-----------|-----------|
@@ -18,12 +18,12 @@
 | 3 | Customer Web UI | ✅ Hoàn thành | 100% |
 | 4 | Admin Web UI | ✅ Hoàn thành | 100% |
 | 5 | API Integration | ✅ Hoàn thành | 100% |
-| 6 | Realtime & Market Data | 🟡 Đang thực hiện | 30% |
+| 6 | Realtime & Market Data | 🟡 Đang thực hiện | 80% |
 | 7 | Background Workers | ⏳ Chưa bắt đầu | 0% |
 | 8 | Infrastructure | 🟡 Đang thực hiện | 20% |
 | 9 | Security & Testing | ⏳ Chưa bắt đầu | 0% |
 | 10 | Performance | ⏳ Chưa bắt đầu | 0% |
-| 11 | Documentation | 🟡 Đang thực hiện | 60% |
+| 11 | Documentation | 🟡 Đang thực hiện | 65% |
 
 ---
 
@@ -382,6 +382,66 @@ cme-trading-clone/
 - Code Review: Passed (3 issues fixed)
 - Security Scan (CodeQL): Passed (0 vulnerabilities)
 - All Builds: Passing
+
+### 10. Phase 6: Realtime & Market Data (80%) 🟡 MỚI
+
+**Realtime WebSocket Service:**
+
+#### Infrastructure ✅
+- NestJS WebSocket service (Port 3003)
+- Socket.IO integration
+- Dual namespaces: `/price` và `/orders`
+- Auto-reconnection support
+- CORS configuration cho frontend
+
+#### Price Gateway ✅
+- **Subscribe/Unsubscribe** mechanism
+- Room-based broadcasting
+- Connection tracking
+- Client management
+- Price update events
+
+#### Price Feed Service ✅
+- Mock price generator với realistic movements
+- 6 markets support: BTC, ETH, XAU, OIL, EUR, GBP
+- Update intervals: 2-5 seconds (randomized)
+- Price volatility: ±0.5% per update
+- 24h metrics: high, low, volume tracking
+- Automatic broadcasting to subscribed clients
+
+#### Order Gateway ✅
+- User-specific order subscriptions
+- Order status update notifications
+- Room-based user isolation
+- Connection management
+
+#### Frontend Integration ✅
+- **usePriceSocket** custom hook
+- Socket.IO client integration
+- Auto-connect/disconnect
+- Market subscription management
+- Real-time price updates trong Market page
+- Live connection status indicator (green dot)
+- Smooth UI transitions
+
+#### WebSocket Events ✅
+**Price Namespace (`/price`):**
+- `subscribe` - Subscribe to markets
+- `unsubscribe` - Unsubscribe from markets
+- `priceUpdate` - Receive live price updates
+- `connection` - Connection confirmation
+
+**Order Namespace (`/orders`):**
+- `subscribeUser` - Subscribe to user orders
+- `unsubscribeUser` - Unsubscribe from user orders
+- `orderUpdate` - Receive order status updates
+
+#### Còn lại (20%):
+- [ ] Trading Board integration với live prices
+- [ ] Push notifications
+- [ ] Admin dashboard real-time metrics
+- [ ] Performance optimization
+- [ ] Load testing
 
 ---
 
