@@ -98,9 +98,11 @@ forex/
 
 ## 📚 Tài liệu tham khảo
 
+- **[SUMMARY.md](./SUMMARY.md)** - Tóm tắt dự án hoàn chỉnh 🆕
 - [QUICKSTART.md](./QUICKSTART.md) - 5 phút khởi động
 - [BAO_CAO_TIEN_DO.md](./BAO_CAO_TIEN_DO.md) - Báo cáo tiến độ chi tiết
-- [DOCUMENTATION.md](./docs/DOCUMENTATION.md) - Tài liệu đầy đủ
+- [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) - Hướng dẫn deployment 🆕
+- [docs/API.md](./docs/API.md) - API Reference đầy đủ 🆕
 - [Phân tích và báo cáo](./Phan_tich_va_bao_cao.md)
 
 ## 🔗 URLs
