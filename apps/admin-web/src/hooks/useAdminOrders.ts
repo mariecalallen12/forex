@@ -2,14 +2,14 @@
 
 import useSWR from 'swr'
 import { getApiClient } from '@/lib/api'
-import type { WalletSummary } from '@cme-trading/api-client'
+import type { Order } from '@cme-trading/api-client'
 
-export function useWallet() {
+export function useAdminOrders() {
   const apiClient = getApiClient()
   
   const { data, error, isLoading, mutate } = useSWR(
-    'wallet-summary',
-    () => apiClient.wallet.getSummary(),
+    'admin-orders',
+    () => apiClient.order.list(),
     {
       revalidateOnFocus: false,
       refreshInterval: 30000, // Refresh every 30 seconds
@@ -17,8 +17,7 @@ export function useWallet() {
   )
 
   return {
-    summary: data as WalletSummary | undefined,
-    wallets: data?.wallets || [],
+    orders: (data || []) as Order[],
     isLoading,
     isError: error,
     mutate,
