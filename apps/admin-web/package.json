@@ -1,10 +1,10 @@
 {
-  "name": "customer-web",
+  "name": "admin-web",
   "version": "1.0.0",
-  "description": "CME Trading Clone - Customer Web App",
+  "description": "CME Trading Clone - Admin Web App",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3002",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -21,7 +21,9 @@
     "swr": "^2.2.0",
     "zustand": "^4.4.0",
     "react-hook-form": "^7.48.0",
-    "clsx": "^2.0.0"
+    "clsx": "^2.0.0",
+    "recharts": "^2.10.0",
+    "date-fns": "^2.30.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -33,5 +35,6 @@
     "autoprefixer": "^10.4.0",
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.0.0"
-  }
+  },
+  "packageManager": "pnpm@10.24.0"
 }

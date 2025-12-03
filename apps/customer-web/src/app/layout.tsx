@@ -1,8 +1,5 @@
 import type { Metadata } from 'next'
-import { Mulish } from 'next/font/google'
 import '../styles/globals.css'
-
-const mulish = Mulish({ subsets: ['latin', 'vietnamese'] })
 
 export const metadata: Metadata = {
   title: 'CME Trading - Nền tảng giao dịch trực tuyến',
@@ -16,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" className="dark">
-      <body className={mulish.className}>{children}</body>
+      <body className="font-sans">{children}</body>
     </html>
   )
 }

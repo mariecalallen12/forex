@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FileService {
-  async uploadFile(file: Express.Multer.File) {
+  async uploadFile(file: any) {
     // Mock file upload - in production, upload to S3/cloud storage
     return {
       success: true,
