@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../base
+
+namespace: cme-trading
+
+patchesStrategicMerge:
+  - replicas.yaml
+  - resources.yaml
+
+configMapGenerator:
+  - name: cme-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+
+secretGenerator:
+  - name: cme-secrets
+    behavior: merge
+    envs:
+      - secrets.env
+
+images:
+  # ⚠️ Replace with your actual Docker registry URLs
+  # Examples:
+  # - Docker Hub: username/cme-api
+  # - GCR: gcr.io/project-id/cme-api
+  # - ECR: 123456789012.dkr.ecr.us-east-1.amazonaws.com/cme-api
+  - name: cme-api
+    newName: REPLACE_WITH_YOUR_REGISTRY/cme-api
+    newTag: latest
+  - name: cme-realtime
+    newName: REPLACE_WITH_YOUR_REGISTRY/cme-realtime
+    newTag: latest
+  - name: cme-customer-web
+    newName: REPLACE_WITH_YOUR_REGISTRY/cme-customer-web
+    newTag: latest
+  - name: cme-admin-web
+    newName: REPLACE_WITH_YOUR_REGISTRY/cme-admin-web
+    newTag: latest

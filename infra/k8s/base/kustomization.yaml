@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cme-trading
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secrets.yaml
+  - postgres-statefulset.yaml
+  - redis-statefulset.yaml
+  - api-deployment.yaml
+  - realtime-deployment.yaml
+  - customer-web-deployment.yaml
+  - admin-web-deployment.yaml
+  - ingress.yaml
+  - hpa.yaml
+  - nginx-lb.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: cme-trading
+      app.kubernetes.io/version: "1.0.0"

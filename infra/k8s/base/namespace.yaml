@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cme-trading
+  labels:
+    name: cme-trading
+    environment: production
