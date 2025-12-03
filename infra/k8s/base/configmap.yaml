@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cme-config
+  namespace: cme-trading
+data:
+  # Database configuration
+  DATABASE_HOST: "postgres-service"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "cme_trading"
+  
+  # Redis configuration
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  
+  # Application ports
+  API_PORT: "3001"
+  REALTIME_PORT: "3003"
+  CUSTOMER_WEB_PORT: "3000"
+  ADMIN_WEB_PORT: "3002"
+  
+  # JWT configuration
+  JWT_EXPIRATION: "7d"
+  JWT_REFRESH_EXPIRATION: "30d"
+  
+  # Environment
+  NODE_ENV: "production"

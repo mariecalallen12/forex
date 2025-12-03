@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../base
+
+namespace: cme-trading
+
+patchesStrategicMerge:
+  - replicas.yaml
+  - resources.yaml
+
+configMapGenerator:
+  - name: cme-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+
+secretGenerator:
+  - name: cme-secrets
+    behavior: merge
+    envs:
+      - secrets.env
+
+images:
+  - name: cme-api
+    newName: your-docker-registry/cme-api
+    newTag: latest
+  - name: cme-realtime
+    newName: your-docker-registry/cme-realtime
+    newTag: latest
+  - name: cme-customer-web
+    newName: your-docker-registry/cme-customer-web
+    newTag: latest
+  - name: cme-admin-web
+    newName: your-docker-registry/cme-admin-web
+    newTag: latest
