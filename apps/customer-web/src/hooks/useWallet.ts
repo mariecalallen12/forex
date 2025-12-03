@@ -2,6 +2,7 @@
 
 import useSWR from 'swr'
 import { getApiClient } from '@/lib/api'
+import type { WalletSummary } from '@cme-trading/api-client'
 
 export function useWallet() {
   const apiClient = getApiClient()
@@ -16,7 +17,8 @@ export function useWallet() {
   )
 
   return {
-    summary: data,
+    summary: data as WalletSummary | undefined,
+    wallets: data?.wallets || [],
     isLoading,
     isError: error,
     mutate,

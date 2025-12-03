@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import MobileHeader from '@/components/layout/MobileHeader'
 import BottomNav from '@/components/layout/BottomNav'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
+import { getApiClient } from '@/lib/api'
 
 const ORDER_DURATIONS = [
   { label: '1 phút', value: 60, profit: 5 },
@@ -12,21 +15,57 @@ const ORDER_DURATIONS = [
 ]
 
 export default function TradingBoardPage() {
+  const { isAuthenticated } = useAuth()
+  const router = useRouter()
   const [amount, setAmount] = useState(100)
   const [duration, setDuration] = useState(60)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const selectedDuration = ORDER_DURATIONS.find(d => d.value === duration)
   const expectedProfit = amount * (selectedDuration?.profit || 0) / 100
 
-  const handleBuyUp = () => {
-    console.log('Buy Up:', { amount, duration })
-    alert('Lệnh Buy Up đã được đặt!')
+  const handleOrder = async (type: 'BUY_UP' | 'BUY_DOWN') => {
+    // Check authentication
+    if (!isAuthenticated) {
+      router.push('/login')
+      return
+    }
+
+    // Validate amount
+    if (amount < 10) {
+      setError('Số tiền tối thiểu là $10')
+      return
+    }
+
+    setError(null)
+    setIsSubmitting(true)
+
+    try {
+      const apiClient = getApiClient()
+      await apiClient.order.create({
+        marketId: 'btc-usdt', // Default market, should come from route params
+        type,
+        amount,
+        duration,
+      })
+      
+      alert(`Lệnh ${type === 'BUY_UP' ? 'Buy Up' : 'Buy Down'} đã được đặt thành công!`)
+      // Reset form
+      setAmount(100)
+    } catch (err: any) {
+      console.error('Order failed:', err)
+      setError(
+        err.response?.data?.message || 
+        'Đặt lệnh thất bại. Vui lòng thử lại.'
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleBuyDown = () => {
-    console.log('Buy Down:', { amount, duration })
-    alert('Lệnh Buy Down đã được đặt!')
-  }
+  const handleBuyUp = () => handleOrder('BUY_UP')
+  const handleBuyDown = () => handleOrder('BUY_DOWN')
 
   return (
     <div className="min-h-screen bg-background-primary text-white pb-20">
@@ -49,6 +88,12 @@ export default function TradingBoardPage() {
         {/* Order Form */}
         <div className="bg-background-secondary p-4 mx-4 mt-4 rounded-lg">
           <h2 className="font-bold text-lg mb-4">Đặt lệnh</h2>
+
+          {error && (
+            <div className="mb-4 bg-danger-main/10 border border-danger-main/20 rounded-lg p-3 text-sm text-danger-main">
+              {error}
+            </div>
+          )}
 
           {/* Duration Selection */}
           <div className="mb-4">
@@ -97,15 +142,17 @@ export default function TradingBoardPage() {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={handleBuyUp}
-              className="bg-success-main hover:bg-success-main/90 text-white font-bold py-4 rounded-lg transition"
+              disabled={isSubmitting}
+              className="bg-success-main hover:bg-success-main/90 text-white font-bold py-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Buy Up 📈
+              {isSubmitting ? 'Đang xử lý...' : 'Buy Up 📈'}
             </button>
             <button
               onClick={handleBuyDown}
-              className="bg-danger-main hover:bg-danger-main/90 text-white font-bold py-4 rounded-lg transition"
+              disabled={isSubmitting}
+              className="bg-danger-main hover:bg-danger-main/90 text-white font-bold py-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Buy Down 📉
+              {isSubmitting ? 'Đang xử lý...' : 'Buy Down 📉'}
             </button>
           </div>
         </div>

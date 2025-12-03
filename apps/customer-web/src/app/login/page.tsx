@@ -3,21 +3,30 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login, isLoading } = useAuth()
   const [tab, setTab] = useState<'phone' | 'email'>('phone')
   const [formData, setFormData] = useState({
     phoneOrEmail: '',
     password: '',
   })
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement actual login logic with API
-    console.log('Login attempt:', formData)
-    // Mock successful login
-    router.push('/m')
+    setError(null)
+    
+    try {
+      // For now, use email for login (phone login needs backend support)
+      await login(formData.phoneOrEmail, formData.password)
+      router.push('/m')
+    } catch (err: any) {
+      console.error('Login failed:', err)
+      setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.')
+    }
   }
 
   return (
@@ -55,6 +64,12 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="bg-danger-main/10 border border-danger-main/20 rounded-lg p-3 text-sm text-danger-main">
+                  {error}
+                </div>
+              )}
+              
               <div>
                 <label className="block text-sm font-medium mb-2">
                   {tab === 'phone' ? 'Số điện thoại' : 'Email'}
@@ -68,6 +83,7 @@ export default function LoginPage() {
                   }
                   className="w-full bg-background-tertiary border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-primary-main transition"
                   required
+                  disabled={isLoading}
                 />
               </div>
 
@@ -84,14 +100,16 @@ export default function LoginPage() {
                   }
                   className="w-full bg-background-tertiary border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-primary-main transition"
                   required
+                  disabled={isLoading}
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-accent-main text-black font-semibold py-3 rounded-lg hover:bg-accent-main/90 transition"
+                disabled={isLoading}
+                className="w-full bg-accent-main text-black font-semibold py-3 rounded-lg hover:bg-accent-main/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Đăng nhập
+                {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </button>
             </form>
 

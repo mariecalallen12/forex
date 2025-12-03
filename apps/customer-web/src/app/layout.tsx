@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import '../styles/globals.css'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 export const metadata: Metadata = {
   title: 'CME Trading - Nền tảng giao dịch trực tuyến',
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" className="dark">
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   )
 }
